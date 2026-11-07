@@ -98,10 +98,10 @@
   $('[data-date-number]').textContent=`${String(today.getMonth()+1).padStart(2,'0')} / ${String(today.getDate()).padStart(2,'0')}`;
   $('[data-date-caption]').textContent=`${today.getFullYear()} · ${today.toLocaleDateString('zh-CN',{weekday:'long'})}`;
   if(storageProblem)$('#save-status').textContent=storageProblem;
-  input.addEventListener('input',()=>{$('#save').disabled=!input.value.trim();resizeInput();const ok=write({...saved,draft:input.value});$('#save-status').textContent=ok?'草稿已留在此体验稿中':'无法保存草稿，请保留当前页面并重试。';});
+  input.addEventListener('input',()=>{$('#save').disabled=!input.value.trim();resizeInput();const ok=write({...saved,draft:input.value});$('#save-status').textContent=ok?'草稿已存本机':'无法保存草稿，请保留当前页面并重试。';});
   window.addEventListener('resize',resizeInput);
   document.fonts?.ready.then(resizeInput);
-  $('#capture-form').addEventListener('submit',event=>{event.preventDefault();if(!input.value.trim())return;const next={...saved,notes:[nextNote(input.value),...saved.notes],draft:''};if(!write(next)){$('#save-status').textContent='无法保存，原文仍在输入框中。';return;}input.value='';input.style.height='';render();$('#save-status').textContent='已记下，原文保留在此体验稿中。';});
+  $('#capture-form').addEventListener('submit',event=>{event.preventDefault();if(!input.value.trim())return;const next={...saved,notes:[nextNote(input.value),...saved.notes],draft:''};if(!write(next)){$('#save-status').textContent='无法保存，原文仍在输入框中。';return;}input.value='';input.style.height='';render();$('#save-status').textContent='已记下 · 仅本机';});
   document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{view=button.dataset.view;sourceId='';filter='all';historyPage=0;focus=false;render();window.scrollTo({top:0,behavior:'instant'});}));
   $('.brand').addEventListener('click',event=>{event.preventDefault();view='notes';sourceId='';filter='all';focus=false;render();window.scrollTo({top:0,behavior:'instant'});});
   $('#focus').addEventListener('click',()=>{focus=!focus;render();input.focus();});
