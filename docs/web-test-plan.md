@@ -11,11 +11,15 @@
 - 之前体验稿有实际浏览器测试报告；本轮浏览器工具返回
   `browser.user is unavailable`，没有进行新的浏览器验收。
 - 网页测试准备 issue 未通过前，不授权 Agent 自动测试私人日记或调用模型。
+- 用户随后授权启动 Agent，并要求每轮 PR 后测试与审查、通过后合并。
+  本轮重置浏览器连接后，浏览器清单与测试能力已可读取；实际冒烟证据另见
+  docs/test-readiness-report.md。上述不可用记录保留为历史事实。
 
 ## GitHub 任务与依赖
 
 仓库：https://github.com/xiaocliuAI/seeking-light
-已创建以下开放任务并保存 blocked-by 依赖；未分配自动执行者，未启动 Agent。
+已创建以下任务并保存 blocked-by 依赖；当前由本地 Agent 执行 #1，
+不是 GitHub Copilot 云端自动指派，也没有创建定时或无人值守发布任务。
 
 | Issue | 任务 | 前置 |
 | --- | --- | --- |
