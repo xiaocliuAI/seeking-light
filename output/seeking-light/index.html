@@ -19,10 +19,10 @@
         <button type="button" data-view="history">回看</button>
         <button type="button" data-view="findings">发现</button>
       </nav>
-      <span class="edition">原文与旁注 / 体验稿</span><button type="button" id="open-import" class="icon-button" aria-label="从 flomo 导入" title="从 flomo 导入"><i data-lucide="import" aria-hidden="true"></i></button>
+      <button type="button" id="open-import" class="icon-button" aria-label="从 flomo 导入" title="从 flomo 导入"><i data-lucide="import" aria-hidden="true"></i></button>
     </header>
     <main>
-      <div class="sample-banner">含虚构记录；发现为固定示例，不调用 Copilot。新输入只保存在此体验稿。</div>
+      <details class="sample-banner"><summary>体验稿 · 仅本机保存 · 发现为示例</summary><p>含虚构记录，发现不调用 Copilot，也不分析新输入。记录只保存在当前浏览器，不会跨设备同步。</p></details>
       <section data-panel="notes" aria-label="随手记">
         <div class="page-heading"><h2>随手记</h2><span data-today-count>今天 0 条</span></div>
         <div class="writing-row">
@@ -30,11 +30,11 @@
           <form id="capture-form" class="composer">
             <label class="sr-only" for="capture">记录此刻</label>
             <textarea id="capture" placeholder="今天，想留下什么？" rows="3"></textarea>
-            <div class="composer-footer"><span id="save-status" role="status">保存在这台设备的体验稿中</span><div class="actions"><button type="button" id="focus" class="icon-button" aria-label="专注书写" aria-pressed="false" title="专注书写"><i data-lucide="expand" aria-hidden="true"></i></button><button type="submit" class="primary" id="save" disabled><i data-lucide="arrow-up" aria-hidden="true"></i>记下</button></div></div>
+            <div class="composer-footer"><span id="save-status" role="status">仅保存在本机</span><div class="actions"><button type="button" id="focus" class="icon-button" aria-label="专注书写" aria-pressed="false" title="专注书写"><i data-lucide="expand" aria-hidden="true"></i></button><button type="submit" class="primary" id="save" disabled><i data-lucide="arrow-up" aria-hidden="true"></i>记下</button></div></div>
           </form>
         </div>
         <div class="stream" id="recent-stream" aria-label="最近的原文"></div>
-        <div class="margin-row quiet-entry"><span class="axis-label">慢慢看见</span><button type="button" data-view="findings">回到这些小事，看看发现示例<i data-lucide="arrow-up-right" aria-hidden="true"></i></button></div>
+        <div class="margin-row quiet-entry"><button type="button" data-view="findings">看看发现示例<i data-lucide="arrow-up-right" aria-hidden="true"></i></button></div>
       </section>
       <section data-panel="history" aria-label="回看" hidden>
         <div class="page-heading"><h2>留在这里的生活</h2><label class="date-filter">日期<select id="history-date" aria-label="回看日期"><option value="all">全部日期</option></select></label></div>
@@ -57,7 +57,6 @@
         </div>
       </section>
     </main>
-    <footer class="page-footer"><span>寻光日记</span><span>记录是记录，发现是线索，不是定论。</span></footer>
   </div>
   <dialog id="consent-dialog" aria-labelledby="consent-title"><form method="dialog"><button class="dialog-close icon-button" aria-label="关闭发现示例"><i data-lucide="x" aria-hidden="true"></i></button></form><h2 id="consent-title">先看示例里的线索</h2><p>这次只展示 7 条虚构记录中的两条示例发现。你新输入的记录不会被分析。</p><p>不连接 GitHub Copilot，不上传内容，也不消耗模型额度。</p><p class="small">正式接入后，真实分析需要单独确认记录范围和发送授权。</p><div class="actions"><button type="button" class="primary" id="confirm-example">查看示例结果</button><button type="button" id="cancel-example">先不看</button></div></dialog>
   <dialog id="reflection-dialog" aria-labelledby="reflection-title"><form method="dialog"><button class="dialog-close icon-button" aria-label="关闭尝试记录"><i data-lucide="x" aria-hidden="true"></i></button></form><h2 id="reflection-title">尝试之后</h2><p id="reflection-context"></p><form id="reflection-form"><label class="sr-only" for="reflection">尝试后的感受</label><textarea id="reflection" placeholder="做了什么？有没有变化？没有变化也可以写下来。" rows="5"></textarea><p id="reflection-status" role="status"></p><div class="actions"><button type="submit" class="primary" id="save-reflection" disabled>记下感受</button><button type="button" id="cancel-reflection">暂时不写</button></div></form></dialog>

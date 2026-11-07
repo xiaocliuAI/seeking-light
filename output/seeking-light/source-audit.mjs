@@ -4,6 +4,17 @@ import vm from 'node:vm';
 
 const html = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
 const js = fs.readFileSync(new URL('./journal.js', import.meta.url), 'utf8');
+const css = fs.readFileSync(new URL('./journal.css', import.meta.url), 'utf8');
+for (const match of css.matchAll(/font-size:\s*(\d+(?:\.\d+)?)px/g)) {
+  assert(Number(match[1]) >= 14, 'Explicit text sizes must be at least 14px, including mobile');
+}
+assert.match(css, /body \{[^}]*font:16px/);
+assert.match(css, /\.annotation \{[^}]*font-size:16px/);
+assert.match(html, /<details class="sample-banner"><summary>体验稿 · 仅本机保存 · 发现为示例<\/summary>/);
+assert.match(html, /不分析新输入/);
+assert.match(html, /不会跨设备同步/);
+assert(!html.includes('class="edition"'), 'No redundant design label in the header');
+assert(!html.includes('class="page-footer"'), 'No repeated explanatory footer');
 new vm.Script(js);
 const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
 assert.equal(new Set(ids).size, ids.length, 'IDs are unique');
