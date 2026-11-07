@@ -27,6 +27,8 @@
   let view='notes',finding='restore',opened=false,filter='all',sourceId='',focus=false;
   const input=$('#capture');input.value=saved.draft;
   const consent=$('#consent-dialog'),reflection=$('#reflection-dialog');
+  // Unsubmitted reflection drafts stay in memory, isolated by finding.
+  const reflectionDrafts=new Map();let reflectionFinding='';
   function resizeInput() {input.style.height='auto';input.style.height=`${Math.max(focus?360:112,input.scrollHeight)}px`;}
   const allNotes=()=>[...saved.notes,...samples].sort((a,b)=>b.date.localeCompare(a.date)||(b.time||'').localeCompare(a.time||''));
   function write(next) {
@@ -106,9 +108,9 @@
   document.querySelectorAll('[data-feedback]').forEach(button=>button.addEventListener('click',()=>{if(write({...saved,feedback:{...saved.feedback,[finding]:button.dataset.feedback}}))render();else $('#feedback-status').textContent='反馈未保存，请重试。';}));
   function keep(state){const previous=saved.attempts[finding]||{};if(write({...saved,attempts:{...saved.attempts,[finding]:{...previous,state}}}))render();else $('#attempt-status').textContent='尝试未保存，请重试。';}
   $('#keep-attempt').addEventListener('click',()=>keep('keep'));$('#defer-attempt').addEventListener('click',()=>keep('later'));
-  $('#reflect-attempt').addEventListener('click',()=>{$('#reflection-context').textContent=findings[finding].attemptTitle;$('#reflection-status').textContent='';reflection.showModal();$('#reflection').focus();});
+  $('#reflect-attempt').addEventListener('click',()=>{reflectionFinding=finding;$('#reflection').value=reflectionDrafts.get(reflectionFinding)||'';$('#save-reflection').disabled=!$('#reflection').value.trim();$('#reflection-context').textContent=findings[reflectionFinding].attemptTitle;$('#reflection-status').textContent='';reflection.showModal();$('#reflection').focus();});
   $('#cancel-reflection').addEventListener('click',()=>reflection.close());
-  $('#reflection').addEventListener('input',()=>{$('#save-reflection').disabled=!$('#reflection').value.trim();});
-  $('#reflection-form').addEventListener('submit',event=>{event.preventDefault();const text=$('#reflection').value;if(!text.trim())return;const note=nextNote(text,finding);const next={...saved,notes:[note,...saved.notes],attempts:{...saved.attempts,[finding]:{state:'keep',resultId:note.id}}};if(!write(next)){$('#reflection-status').textContent='没有保存成功，感受仍在输入框中。';return;}$('#reflection').value='';$('#save-reflection').disabled=true;reflection.close();render();$('#attempt-status').textContent='已记下感受，也留在回看里。';});
+  $('#reflection').addEventListener('input',()=>{if(reflectionFinding)reflectionDrafts.set(reflectionFinding,$('#reflection').value);$('#save-reflection').disabled=!$('#reflection').value.trim();});
+  $('#reflection-form').addEventListener('submit',event=>{event.preventDefault();const text=$('#reflection').value;if(!text.trim()||!reflectionFinding)return;reflectionDrafts.set(reflectionFinding,text);const note=nextNote(text,reflectionFinding);const next={...saved,notes:[note,...saved.notes],attempts:{...saved.attempts,[reflectionFinding]:{state:'keep',resultId:note.id}}};if(!write(next)){$('#reflection-status').textContent='没有保存成功，感受仍在输入框中。';return;}reflectionDrafts.delete(reflectionFinding);$('#reflection').value='';$('#save-reflection').disabled=true;reflection.close();render();$('#attempt-status').textContent='已记下感受，也留在回看里。';});
   render();
 })();
