@@ -1,0 +1,13 @@
+{
+  "name": "seeking-light-journal",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Private journal with evidence-grounded findings",
+  "scripts": {
+    "start": "node server.mjs",
+    "start:prototype": "node output/seeking-light/server.mjs",
+    "test": "node scripts/test.mjs",
+    "test:prototype": "node output/seeking-light/source-audit.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

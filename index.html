@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="寻光日记：随手留下生活，慢慢看见自己。" />
+    <title>寻光日记</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-regular.css" />
+    <link rel="stylesheet" href="journal.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="主导航">
+        <button class="brand" type="button" data-view-target="today" aria-label="回到随手记"><span class="brand-mark" aria-hidden="true"><i data-lucide="book-open"></i></span><strong>寻光日记</strong></button>
+        <nav class="main-nav">
+          <button class="nav-item is-active" type="button" data-view-target="today"><i data-lucide="notebook-pen" aria-hidden="true"></i><span>随手记</span></button>
+          <button class="nav-item" type="button" data-view-target="findings"><i data-lucide="sparkles" aria-hidden="true"></i><span>发现</span><span class="nav-dot" id="findingDot" hidden></span></button>
+          <button class="nav-item" type="button" data-view-target="history"><i data-lucide="calendar-days" aria-hidden="true"></i><span>回看</span></button>
+        </nav>
+        <div class="sidebar-spacer"></div>
+        <button class="reminder-entry" id="reminderButton" type="button"><i data-lucide="bell" aria-hidden="true"></i><span><strong>每日提醒</strong><small id="reminderSummary">尚未开启</small></span></button>
+      </aside>
+      <header class="mobile-header"><button class="mobile-brand" type="button" data-view-target="today"><span class="brand-mark" aria-hidden="true"><i data-lucide="book-open"></i></span><strong>寻光日记</strong></button><button class="icon-button" id="mobileReminderButton" type="button" aria-label="提醒设置" title="提醒设置"><i data-lucide="bell" aria-hidden="true"></i></button></header>
+      <main class="main-content">
+        <section class="app-view is-active" id="todayView" data-view="today" aria-labelledby="todayTitle">
+          <header class="page-header today-header"><p class="eyebrow" id="dateEyebrow"></p><h1 id="todayTitle">日子，慢慢写。</h1></header>
+          <div class="today-layout">
+            <section class="freewrite-canvas" aria-labelledby="freewriteTitle">
+              <header class="freewrite-header"><h2 id="freewriteTitle" class="sr-only">记下一件小事</h2></header>
+              <label class="sr-only" for="freewriteInput">记录此刻</label><textarea id="freewriteInput" maxlength="1600" placeholder="想到什么，就写下来……"></textarea>
+              <footer class="freewrite-footer"><p id="saveStatus" role="status">保存在这台设备上</p><div class="composer-actions"><button class="icon-button" id="focusComposerButton" type="button" aria-pressed="false" aria-label="专注书写" title="专注书写"><i data-lucide="expand" aria-hidden="true"></i></button><button class="primary-button" id="captureMomentsButton" type="button" disabled><i data-lucide="arrow-up" aria-hidden="true"></i>记下</button></div></footer>
+            </section>
+            <section class="footprint" aria-labelledby="footprintTitle">
+              <div class="footprint-heading"><h2 id="footprintTitle">记录过的日子</h2><div class="footprint-heading-actions"><label><span class="sr-only">足迹年份</span><select id="footprintYearSelect" aria-label="足迹年份"></select></label><label id="footprintMonthControl" hidden><span class="sr-only">足迹月份</span><select id="footprintMonthSelect" aria-label="足迹月份"></select></label><div class="footprint-periods" role="group" aria-label="记录足迹视图"><button type="button" data-footprint-period="year" aria-pressed="true">年</button><button type="button" data-footprint-period="month" aria-pressed="false">月</button></div></div></div>
+              <div class="footprint-totals" aria-live="polite"><span>今天 <strong id="footprintToday">0</strong> 条</span><span>本月 <strong id="footprintMonth">0</strong> 条</span><span>今年 <strong id="footprintYear">0</strong> 条</span></div>
+              <p class="footprint-period-count" id="footprintPeriodCount" hidden></p>
+              <div id="annualFootprint"><div id="footprintMonthLabels" class="footprint-month-labels" aria-hidden="true"></div><div class="footprint-year-wrap"><div class="footprint-week-labels" aria-hidden="true"><span>一</span><span></span><span>三</span><span></span><span>五</span><span></span><span>日</span></div><div class="footprint-year-grid" id="footprintGrid" role="img" aria-label="每日记录数量热力图"></div></div></div>
+              <div id="monthlyFootprint" hidden><div class="weekday-row" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div><div id="footprintMonthGrid" class="footprint-month-grid"></div></div>
+              <div class="footprint-legend" aria-label="颜色代表每日记录条数"><span>每格一天</span><span><i data-level="0"></i>0</span><span><i data-level="1"></i>1</span><span><i data-level="2"></i>2–3</span><span><i data-level="3"></i>4–6</span><span><i data-level="4"></i>7+ 条</span></div>
+              <p id="footprintHover" class="footprint-hover" role="status"></p>
+            </section>
+            <section class="moment-section" aria-labelledby="momentStreamTitle">
+              <header class="moment-heading"><div><h2 id="momentStreamTitle">最近记下的</h2><span id="momentCount"></span></div><div class="stream-filters"><label><span class="sr-only">回看某天</span><input id="streamDate" type="date" aria-label="回看某天的记录" /></label><button type="button" id="clearStreamDate" class="text-button" hidden>查看最近</button></div></header>
+              <div class="moment-stream" id="momentStream"></div><button type="button" id="loadMoreNotes" class="text-button load-more" hidden>再看看之前的</button>
+            </section>
+            <button type="button" class="home-finding" id="homeFinding" data-view-target="findings" hidden><span><i data-lucide="sparkles" aria-hidden="true"></i>有一条新的线索</span><strong id="homeFindingTitle"></strong><span>看看原文依据 <i data-lucide="arrow-right" aria-hidden="true"></i></span></button>
+          </div>
+        </section>
+        <section class="app-view" id="findingsView" data-view="findings" aria-labelledby="findingsTitle">
+          <header class="page-header"><p class="eyebrow">从日常里，慢慢看见自己</p><div class="view-title-row"><h1 id="findingsTitle">发现一点光。</h1><div class="period-control" role="group" aria-label="分析周期"><button class="is-active" type="button" data-period="7">7 天</button><button type="button" data-period="30">30 天</button><button type="button" data-period="all">全部</button></div></div></header>
+          <section class="copilot-panel" aria-labelledby="copilotTitle">
+            <h2 id="copilotTitle">这些小事，会不会连在一起？</h2>
+            <div class="copilot-actions"><button class="primary-button" id="generateCopilotButton" type="button"><i data-lucide="sparkles" aria-hidden="true"></i>找找线索</button><button class="text-button" id="cancelCopilotButton" type="button" hidden>取消分析</button></div>
+            <p class="copilot-message" id="copilotMessage" role="status" aria-live="polite"></p>
+            <details class="connection-settings"><summary>Copilot 连接设置</summary><p id="copilotStatus" role="status">尚未检查本机 Copilot</p><div class="copilot-controls"><label for="copilotModel">模型<input id="copilotModel" type="text" maxlength="100" placeholder="本机默认模型" autocomplete="off" /></label><button class="secondary-button" id="checkCopilotButton" type="button">检查连接</button></div><p class="copilot-note">分析前会确认记录范围。内容经本机连接发送至 Copilot 服务，使用你的账号额度，并可能保留在 Copilot 的本地会话历史中。</p></details>
+            <div id="copilotResult" hidden></div>
+          </section>
+          <details class="local-analysis"><summary>回看已标注的投入与感受</summary><p class="local-analysis-label">以下为本地规则统计，非 Copilot 分析；不包含未确认的感受。</p>
+            <div class="finding-empty" id="findingEmpty" hidden><h2>暂时没有足够的标注。</h2><p>可以继续随手记，不必为每条记录打分。</p><button class="secondary-button" id="loadDemoButton" type="button">查看标注示例</button></div>
+            <div class="findings-dashboard" id="findingsDashboard">
+              <section class="finding-lead"><div class="lead-copy"><h2 id="leadFindingTitle"></h2><p id="leadFindingCopy"></p><div class="evidence-line" id="leadEvidence"></div></div><div class="energy-compass" id="energyCompass" aria-label="投入度与能量罗盘"></div></section>
+              <section class="finding-section"><h2>让你投入的活动</h2><div class="evidence-list" id="brightList"></div></section><section class="finding-section"><h2>有些事情，让你消耗</h2><div class="evidence-list" id="drainList"></div></section>
+              <section class="pattern-section"><h2 id="interestTitle"></h2><p id="interestCopy"></p><div class="keyword-row" id="keywordRow"></div></section>
+              <section class="experiment-section" aria-labelledby="experimentTitle"><h2 id="experimentTitle">一个可选的小尝试</h2><div class="experiment-card"><h3 id="experimentName"></h3><p id="experimentCopy"></p><button class="secondary-button" id="acceptExperimentButton" type="button">留作下一次小尝试</button></div></section>
+            </div>
+          </details>
+        </section>
+        <section class="app-view" id="historyView" data-view="history" aria-labelledby="historyTitle">
+          <header class="page-header"><p class="eyebrow">留在这里的日常</p><div class="view-title-row"><h1 id="historyTitle">回头看看。</h1><div class="history-actions"><button class="text-button" id="clearDemoButton" type="button" hidden>清除体验示例</button><button class="secondary-button" id="exportButton" type="button"><i data-lucide="download" aria-hidden="true"></i>导出</button></div></div></header>
+          <section class="history-summary" aria-label="记录概览"><span>已经留下 <strong id="summaryEntries">0</strong> 条记录</span><span>散落在 <strong id="summaryDays">0</strong> 天里</span></section>
+          <div class="history-layout"><section class="calendar-section" aria-labelledby="calendarTitle"><div class="calendar-heading"><button class="icon-button" id="previousMonth" type="button" aria-label="上个月" title="上个月"><i data-lucide="chevron-left" aria-hidden="true"></i></button><h2 id="calendarTitle"></h2><button class="icon-button" id="nextMonth" type="button" aria-label="下个月" title="下个月"><i data-lucide="chevron-right" aria-hidden="true"></i></button></div><div class="weekday-row" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div><div class="calendar-grid" id="calendarGrid"></div></section><section class="history-detail" aria-labelledby="historyDetailTitle"><div class="history-detail-heading"><p class="eyebrow" id="historyDetailDate"></p><h2 id="historyDetailTitle">选择一天</h2></div><div id="historyDetailEntries" class="history-entry-list"></div></section></div>
+        </section>
+      </main>
+      <nav class="mobile-nav" aria-label="移动端主导航"><button class="is-active" type="button" data-view-target="today"><i data-lucide="notebook-pen" aria-hidden="true"></i>随手记</button><button type="button" data-view-target="findings"><i data-lucide="sparkles" aria-hidden="true"></i>发现</button><button type="button" data-view-target="history"><i data-lucide="calendar-days" aria-hidden="true"></i>回看</button></nav>
+    </div>
+    <dialog class="app-dialog" id="entryDialog" aria-labelledby="entryDialogTitle"><form method="dialog" id="entryForm">
+      <div class="dialog-header"><h2 id="entryDialogTitle">编辑记录</h2><button class="icon-button close-dialog" type="button" aria-label="关闭" title="关闭"><i data-lucide="x" aria-hidden="true"></i></button></div>
+      <label class="field-block activity-field"><span class="sr-only">记录正文</span><textarea id="activityInput" rows="5" maxlength="1600"></textarea></label>
+      <details class="reflection-details"><summary>补充感受与情境</summary>
+        <fieldset class="field-block"><legend>更接近哪一边？</legend><div class="area-control"><label><input type="radio" name="entry-area" value="work" /><span>个人工作</span></label><label><input type="radio" name="entry-area" value="life" /><span>生活</span></label></div></fieldset>
+        <fieldset class="field-block"><legend>你的投入度怎么样？</legend><div class="scale-control" id="engagementScale"><label><input type="radio" name="engagement" value="1" /><span>1<small>分心</small></span></label><label><input type="radio" name="engagement" value="2" /><span>2<small>略低</small></span></label><label><input type="radio" name="engagement" value="3" /><span>3<small>一般</small></span></label><label><input type="radio" name="engagement" value="4" /><span>4<small>投入</small></span></label><label><input type="radio" name="engagement" value="5" /><span>5<small>心流</small></span></label></div></fieldset>
+        <fieldset class="field-block"><legend>结束后，你的感受如何？</legend><div class="feeling-control" id="feelingControl"><label><input type="radio" name="feeling" value="energized" /><span>充满活力</span></label><label><input type="radio" name="feeling" value="satisfied" /><span>满足愉快</span></label><label><input type="radio" name="feeling" value="calm" /><span>平静舒展</span></label><label><input type="radio" name="feeling" value="neutral" /><span>没什么变化</span></label><label><input type="radio" name="feeling" value="tense" /><span>紧绷烦躁</span></label><label><input type="radio" name="feeling" value="drained" /><span>疲惫耗尽</span></label></div></fieldset>
+        <fieldset class="field-block"><legend>当时的情境</legend><div class="context-groups"><label><input type="checkbox" name="context" value="独处" />独处</label><label><input type="checkbox" name="context" value="协作" />协作</label><label><input type="checkbox" name="context" value="户外" />户外</label><label><input type="checkbox" name="context" value="安静" />安静</label><label><input type="checkbox" name="context" value="创造" />创造</label><label><input type="checkbox" name="context" value="解决问题" />解决问题</label><label><input type="checkbox" name="context" value="表达" />表达</label><label><input type="checkbox" name="context" value="照顾他人" />照顾他人</label><label><input type="checkbox" name="context" value="即时反馈" />即时反馈</label><label><input type="checkbox" name="context" value="看见成果" />看见成果</label><label><input type="checkbox" name="context" value="得到认可" />得到认可</label><label><input type="checkbox" name="context" value="学习新知" />学习新知</label></div></fieldset>
+      </details><div class="dialog-actions"><button class="text-button close-dialog" type="button">取消</button><button class="primary-button" type="submit">保存修改</button></div>
+    </form></dialog>
+    <dialog class="app-dialog reminder-dialog" id="reminderDialog" aria-labelledby="reminderTitle"><form method="dialog" id="reminderForm"><div class="dialog-header"><h2 id="reminderTitle">留一点时间，给自己。</h2><button class="icon-button close-reminder" type="button" aria-label="关闭" title="关闭"><i data-lucide="x" aria-hidden="true"></i></button></div><label class="toggle-line"><span>每日提醒</span><input id="reminderEnabled" type="checkbox" role="switch" /></label><label class="time-field"><span>提醒时间</span><input id="reminderTime" type="time" value="21:30" /></label><label class="field-block reminder-message"><span>提醒语</span><input id="reminderMessage" type="text" maxlength="60" value="今天发生了什么，想留下哪一件？" /></label><p class="prototype-note">当前在页面打开时提醒；关闭页面后暂不能推送。</p><div class="dialog-actions"><button class="text-button close-reminder" type="button">取消</button><button class="primary-button" type="submit">保存提醒</button></div></form></dialog>
+    <dialog class="app-dialog" id="copilotConsentDialog" aria-labelledby="copilotConsentTitle"><form id="copilotConsentForm"><div class="dialog-header"><h2 id="copilotConsentTitle">这次想回看哪些经历？</h2><button class="icon-button" id="closeCopilotConsentButton" type="button" aria-label="关闭" title="关闭"><i data-lucide="x" aria-hidden="true"></i></button></div><p id="copilotConsentSummary"></p><p class="copilot-note">所选记录的日期、正文、分类、已确认的投入与感受、情境标签将发送给 GitHub Copilot。未补充的感受保持未知；不发送示例、输入中的草稿、其他文件或账号凭证。</p><div id="copilotPreview" class="copilot-preview"></div><label class="copilot-ack"><input id="copilotConsentCheck" type="checkbox" required />我同意发送所选内容至 Copilot 服务，并使用我的账号额度。</label><div class="dialog-actions"><button class="text-button" id="cancelCopilotConsentButton" type="button">暂不分析</button><button class="primary-button" type="submit">确认并分析</button></div></form></dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="assets/lucide.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
