@@ -8,6 +8,7 @@ const audits = [
   'tests/copilot-ui-audit.mjs',
   'tests/copilot-audit.mjs',
   'output/seeking-light/source-audit.mjs',
+  'tests/test-readiness-audit.mjs',
 ];
 const root = new URL('../', import.meta.url);
 let failed = false;

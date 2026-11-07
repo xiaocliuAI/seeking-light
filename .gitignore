@@ -30,10 +30,17 @@
 !/scripts/
 /scripts/*
 !/scripts/test.mjs
+!/scripts/test-preview.mjs
+!/.github/
+/.github/*
+!/.github/workflows/
+/.github/workflows/*
+!/.github/workflows/test.yml
 !/docs/
 /docs/*
 !/docs/development.md
 !/docs/web-test-plan.md
+!/docs/test-readiness-report.md
 !/docs/issues/
 /docs/issues/*
 !/docs/issues/*.md

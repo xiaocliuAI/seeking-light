@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.mjs",
     "start:prototype": "node output/seeking-light/server.mjs",
+    "start:test": "node scripts/test-preview.mjs",
     "test": "node scripts/test.mjs",
     "test:prototype": "node output/seeking-light/source-audit.mjs"
   },
