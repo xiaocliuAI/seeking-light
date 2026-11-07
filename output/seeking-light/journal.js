@@ -20,8 +20,10 @@
   };
   let saved = {notes:[],attempts:{},feedback:{},draft:''};
   let storageProblem = '';
+  let persistedValue = null;
   try {
-    const data = JSON.parse(localStorage.getItem(storageKey) || 'null');
+    persistedValue = localStorage.getItem(storageKey);
+    const data = JSON.parse(persistedValue || 'null');
     if(data && Array.isArray(data.notes)) saved = {notes:data.notes.filter(n=>n&&typeof n.id==='string'&&typeof n.text==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(n.date)),attempts:data.attempts&&typeof data.attempts==='object'?data.attempts:{},feedback:data.feedback&&typeof data.feedback==='object'?data.feedback:{},draft:typeof data.draft==='string'?data.draft:''};
   } catch {storageProblem='未能读取本机体验稿；保存前会再次检查。';}
   let view='notes',finding='restore',opened=false,filter='all',sourceId='',focus=false;
@@ -29,15 +31,17 @@
   const consent=$('#consent-dialog'),reflection=$('#reflection-dialog');
   // Unsubmitted reflection drafts stay in memory, isolated by finding.
   const reflectionDrafts=new Map();let reflectionFinding='';
+  let historyPage=0;
+  const pageSize=50;
   function resizeInput() {input.style.height='auto';input.style.height=`${Math.max(focus?360:112,input.scrollHeight)}px`;}
   const allNotes=()=>[...saved.notes,...samples].sort((a,b)=>b.date.localeCompare(a.date)||(b.time||'').localeCompare(a.time||''));
   function write(next) {
-    try {localStorage.setItem(storageKey,JSON.stringify(next));saved=next;return true;}
+    try {const serialized=JSON.stringify(next);localStorage.setItem(storageKey,serialized);persistedValue=serialized;saved=next;return true;}
     catch {return false;}
   }
   function el(tag,className,text) {const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
   function icons(){if(window.lucide)window.lucide.createIcons({attrs:{width:18,height:18}});}
-  function formatDate(key){const [y,m,d]=key.split('-');return `${Number(m)} 月 ${Number(d)} 日`;}
+  function formatDate(key){const [y,m,d]=key.split('-');return `${Number(y)!==today.getFullYear()?`${y} 年 `:''}${Number(m)} 月 ${Number(d)} 日`;}
   function entry(note,quote='',link=false) {
     const article=el('article',`entry${note.id===sourceId?' is-source':''}`);article.dataset.noteId=note.id;
     const meta=el('div','entry-meta');meta.append(el('time','',formatDate(note.date)),el('span','',note.time||''));if(note.sample)meta.append(el('span','','示例'));
@@ -46,7 +50,8 @@
     if(at>=0){text.append(document.createTextNode(note.text.slice(0,at)),el('mark','',quote),document.createTextNode(note.text.slice(at+quote.length)));}else text.textContent=note.text;
     content.append(text);
     if(note.attempt)content.append(el('p','entry-extra',`小尝试的回看 / ${findings[note.attempt]?.label||'自己的尝试'}`));
-    if(link){const button=el('button','source-link','查看完整原文');button.type='button';button.addEventListener('click',()=>{sourceId=note.id;filter=note.date;view='history';focus=false;render();$('#history-stream').querySelector(`[data-note-id="${note.id}"]`)?.scrollIntoView({block:'center',behavior:'instant'});});content.append(button);}
+    if(note.source==='flomo')content.append(el('p','entry-extra','来自 flomo'));
+    if(link){const button=el('button','source-link','查看完整原文');button.type='button';button.addEventListener('click',()=>{sourceId=note.id;filter=note.date;view='history';focus=false;const at=allNotes().filter(n=>n.date===filter).findIndex(n=>n.id===note.id);historyPage=Math.floor(Math.max(0,at)/pageSize);render();$('#history-stream').querySelector(`[data-note-id="${note.id}"]`)?.scrollIntoView({block:'center',behavior:'instant'});});content.append(button);}
     article.append(meta,content);return article;
   }
   function renderStream(target,notes) {
@@ -59,7 +64,7 @@
     const count=(prefix)=>all.filter(n=>n.date.startsWith(prefix)&&n.date<=todayKey).length;
     $('[data-today-count]').textContent=`今天 ${count(todayKey)} 条（含示例）`;
     $('[data-count="today"]').textContent=count(todayKey);$('[data-count="month"]').textContent=count(todayKey.slice(0,7));$('[data-count="year"]').textContent=count(todayKey.slice(0,4));
-    $('#record-total').textContent=`${count(todayKey.slice(0,4))} 条（含示例）`;
+    $('#record-total').textContent=`${all.length} 条（含示例）`;
     const year=today.getFullYear(),start=new Date(year,0,1);const days=Math.round((Date.UTC(year+1,0,1)-Date.UTC(year,0,1))/86400000);
     const counts=new Map();all.forEach(n=>counts.set(n.date,(counts.get(n.date)||0)+1));
     const heat=$('#heatmap');heat.replaceChildren();const offset=(start.getDay()+6)%7,columns=Math.ceil((offset+days)/7);heat.style.gridTemplateColumns=`repeat(${columns},minmax(0,1fr))`;heat.style.aspectRatio=`${columns}/7`;
@@ -83,7 +88,8 @@
     root.classList.toggle('is-focus',focus&&view==='notes');document.querySelectorAll('[data-panel]').forEach(panel=>panel.hidden=panel.dataset.panel!==view);
     document.querySelectorAll('nav [data-view]').forEach(button=>{if(button.dataset.view===view)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});
     $('#save').disabled=!input.value.trim();$('#focus').setAttribute('aria-pressed',String(focus));$('#focus').setAttribute('aria-label',focus?'退出专注书写':'专注书写');$('#focus').title=focus?'退出专注书写':'专注书写';
-    const all=allNotes();renderStream($('#recent-stream'),all.slice(0,4));renderStream($('#history-stream'),filter==='all'?all:all.filter(n=>n.date===filter));
+    const all=allNotes(),history=filter==='all'?all:all.filter(n=>n.date===filter);renderStream($('#recent-stream'),all.slice(0,4));historyPage=Math.min(historyPage,Math.max(0,Math.ceil(history.length/pageSize)-1));renderStream($('#history-stream'),history.slice(historyPage*pageSize,(historyPage+1)*pageSize));
+    $('#history-pager').hidden=history.length<=pageSize;$('#history-prev').disabled=historyPage===0;$('#history-next').disabled=(historyPage+1)*pageSize>=history.length;$('#history-page').textContent=`${historyPage+1} / ${Math.max(1,Math.ceil(history.length/pageSize))} 页 · 共 ${history.length} 条`;
     const dateSelect=$('#history-date');dateSelect.replaceChildren(el('option','','全部日期'));dateSelect.children[0].value='all';[...new Set(all.map(n=>n.date))].forEach(key=>{const option=el('option','',`${key}${key===todayKey?' / 今天':''}`);option.value=key;dateSelect.append(option);});dateSelect.value=filter;
     $('#source-context').textContent=sourceId?'已定位到发现引用的原文；内容没有被改写。':'';$('#back-to-finding').hidden=!sourceId;
     renderCounts();renderFinding();icons();resizeInput();
@@ -96,10 +102,12 @@
   window.addEventListener('resize',resizeInput);
   document.fonts?.ready.then(resizeInput);
   $('#capture-form').addEventListener('submit',event=>{event.preventDefault();if(!input.value.trim())return;const next={...saved,notes:[nextNote(input.value),...saved.notes],draft:''};if(!write(next)){$('#save-status').textContent='无法保存，原文仍在输入框中。';return;}input.value='';input.style.height='';render();$('#save-status').textContent='已记下，原文保留在此体验稿中。';});
-  document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{view=button.dataset.view;sourceId='';filter='all';focus=false;render();window.scrollTo({top:0,behavior:'instant'});}));
+  document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{view=button.dataset.view;sourceId='';filter='all';historyPage=0;focus=false;render();window.scrollTo({top:0,behavior:'instant'});}));
   $('.brand').addEventListener('click',event=>{event.preventDefault();view='notes';sourceId='';filter='all';focus=false;render();window.scrollTo({top:0,behavior:'instant'});});
   $('#focus').addEventListener('click',()=>{focus=!focus;render();input.focus();});
-  $('#history-date').addEventListener('change',()=>{filter=$('#history-date').value;sourceId='';render();});
+  $('#history-date').addEventListener('change',()=>{filter=$('#history-date').value;sourceId='';historyPage=0;render();});
+  $('#history-prev').addEventListener('click',()=>{historyPage=Math.max(0,historyPage-1);render();window.scrollTo({top:0,behavior:'instant'});});
+  $('#history-next').addEventListener('click',()=>{historyPage++;render();window.scrollTo({top:0,behavior:'instant'});});
   $('#show-consent').addEventListener('click',()=>consent.showModal());
   $('#cancel-example').addEventListener('click',()=>consent.close());
   $('#confirm-example').addEventListener('click',()=>{opened=true;consent.close();render();});
@@ -112,5 +120,55 @@
   $('#cancel-reflection').addEventListener('click',()=>reflection.close());
   $('#reflection').addEventListener('input',()=>{if(reflectionFinding)reflectionDrafts.set(reflectionFinding,$('#reflection').value);$('#save-reflection').disabled=!$('#reflection').value.trim();});
   $('#reflection-form').addEventListener('submit',event=>{event.preventDefault();const text=$('#reflection').value;if(!text.trim()||!reflectionFinding)return;reflectionDrafts.set(reflectionFinding,text);const note=nextNote(text,reflectionFinding);const next={...saved,notes:[note,...saved.notes],attempts:{...saved.attempts,[reflectionFinding]:{state:'keep',resultId:note.id}}};if(!write(next)){$('#reflection-status').textContent='没有保存成功，感受仍在输入框中。';return;}reflectionDrafts.delete(reflectionFinding);$('#reflection').value='';$('#save-reflection').disabled=true;reflection.close();render();$('#attempt-status').textContent='已记下感受，也留在回看里。';});
+  const importDialog=$('#import-dialog');
+  let importVersion=0,importPlan=null,importBusy=false;
+  function updateImportButton(){ $('#confirm-import').disabled=importBusy||!importPlan?.notes.length||(!$('#import-ack-label').hidden&&!$('#import-ack').checked); }
+  function resetImport(){importVersion++;importPlan=null;importBusy=false;$('#import-file').value='';$('#import-preview').hidden=true;$('#import-status').textContent='';$('#import-ack').checked=false;updateImportButton();}
+  $('#open-import').addEventListener('click',()=>{resetImport();importDialog.showModal();});
+  $('#cancel-import').addEventListener('click',()=>importDialog.close());
+  importDialog.addEventListener('close',resetImport);
+  $('#import-ack').addEventListener('change',updateImportButton);
+  $('#import-file').addEventListener('change',async()=>{
+    const version=++importVersion,api=window.SeekingLightImport,files=Array.from($('#import-file').files||[]);
+    importPlan=null;importBusy=true;$('#import-preview').hidden=true;$('#import-ack').checked=false;$('#import-status').textContent='正在读取文件…';updateImportButton();
+    try {
+      if(!files.length){$('#import-status').textContent='';return;}
+      if(!api)throw new Error('导入组件没有加载，请刷新页面后重试。');
+      if(files.some(file=>!/\.html?$/i.test(file.name)))throw new Error('请选择 HTML 文件；ZIP 需要先解压。');
+      if(files.reduce((sum,file)=>sum+file.size,0)>api.MAX_BYTES)throw new Error('文件总大小超过 20 MB，请在 flomo 按日期分批导出。');
+      const result={records:[],total:0,invalid:0,empty:0,media:0};
+      for(const file of files){
+        const html=new TextDecoder('utf-8',{fatal:true}).decode(await file.arrayBuffer());
+        if(version!==importVersion)return;
+        const parsed=api.parseHTML(html,document);
+        for(const field of ['total','invalid','empty','media'])result[field]+=parsed[field];
+        result.records.push(...parsed.records);
+        if(result.total>40000)throw new Error('记录超过 40,000 条，请分批导出。');
+      }
+      const plan=api.plan(result.records,saved.notes);
+      const notes=await api.identify(plan.notes,window.crypto);
+      if(version!==importVersion)return;
+      importPlan={notes};
+      const dates=result.records.map(n=>n.date).sort();
+      $('#import-summary').textContent=`找到 ${result.total} 条 · 新增 ${notes.length} 条 · 重复 ${plan.duplicates} 条${dates.length?`\n${dates[0]} 至 ${dates[dates.length-1]}`:''}`;
+      $('#import-warning').textContent=`不会覆盖已有记录。重复按原日期、时间和相同文字判断。${result.invalid?` ${result.invalid} 条缺少内容或有效时间，不能导入。`:''}${result.empty?` ${result.empty} 条没有可导入的文字，不能导入。`:''}${result.media?` ${result.media} 条含图片或附件，仅导入文字。`:''}`;
+      $('#import-ack-label').hidden=!(result.invalid||result.empty||result.media);
+      $('#import-examples').replaceChildren(...notes.slice(0,3).map(note=>{const article=el('article');article.append(el('time','',`${note.date} ${note.time}`),el('p','',note.text.length>280?`${note.text.slice(0,280)}…`:note.text));return article;}));
+      $('#import-preview').hidden=false;$('#import-status').textContent=notes.length?'尚未写入，确认后才会导入。':'没有新增记录。';
+    } catch(error){if(version===importVersion){importPlan=null;$('#import-status').textContent=error.name==='TypeError'?'文件编码无法读取，请重新导出 UTF-8 HTML。':error.message||'无法读取文件，请重新导出后再试。';}}
+    finally {if(version===importVersion){importBusy=false;updateImportButton();}}
+  });
+  $('#confirm-import').addEventListener('click',()=>{
+    if($('#confirm-import').disabled||!importPlan)return;
+    try {
+      const current=localStorage.getItem(storageKey);
+      if(storageProblem||current!==persistedValue)throw new Error('本机记录发生变化或未能读取，请关闭导入并刷新页面后重试。');
+      if(current){const data=JSON.parse(current);if(!data||!Array.isArray(data.notes)||data.notes.length!==saved.notes.length)throw new Error('已有记录格式异常，未导入。请保留当前记录和导出文件。');}
+      const notes=window.SeekingLightImport.plan(importPlan.notes,saved.notes).notes;
+      if(!notes.length){$('#import-status').textContent='这些记录已经导入，无需重复操作。';importPlan=null;updateImportButton();return;}
+      if(!write({...saved,notes:[...notes,...saved.notes]}))throw new Error('浏览器空间不足或无法保存，整批未导入，原记录没有改变。请保留导出文件。');
+      importDialog.close();view='history';filter='all';sourceId='';historyPage=0;focus=false;render();$('#source-context').textContent=`已从 flomo 导入 ${notes.length} 条，原日期和文字已保留；没有发送给 AI。`;
+    } catch(error){$('#import-status').textContent=error.message||'没有导入，原记录未改变。';}
+  });
   render();
 })();

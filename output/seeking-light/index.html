@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-regular.css">
   <link rel="stylesheet" href="journal.css">
   <script src="../../assets/lucide.min.js" defer></script>
+  <script src="flomo-import.js" defer></script>
   <script src="journal.js" defer></script>
 </head>
 <body>
@@ -18,7 +19,7 @@
         <button type="button" data-view="history">回看</button>
         <button type="button" data-view="findings">发现</button>
       </nav>
-      <span class="edition">原文与旁注 / 体验稿</span>
+      <span class="edition">原文与旁注 / 体验稿</span><button type="button" id="open-import" class="icon-button" aria-label="从 flomo 导入" title="从 flomo 导入"><i data-lucide="import" aria-hidden="true"></i></button>
     </header>
     <main>
       <div class="sample-banner">含虚构记录；发现为固定示例，不调用 Copilot。新输入只保存在此体验稿。</div>
@@ -43,6 +44,7 @@
         </details>
         <div class="source-context" id="source-context" role="status"></div>
         <div class="stream" id="history-stream"></div>
+        <div class="history-pager" id="history-pager" hidden><button type="button" id="history-prev" class="icon-button" aria-label="上一页" title="上一页"><i data-lucide="chevron-left" aria-hidden="true"></i></button><span id="history-page" role="status"></span><button type="button" id="history-next" class="icon-button" aria-label="下一页" title="下一页"><i data-lucide="chevron-right" aria-hidden="true"></i></button></div>
         <button type="button" id="back-to-finding" class="text-button" hidden><i data-lucide="arrow-left" aria-hidden="true"></i>回到刚才的发现</button>
       </section>
       <section data-panel="findings" aria-label="发现" hidden>
@@ -59,5 +61,6 @@
   </div>
   <dialog id="consent-dialog" aria-labelledby="consent-title"><form method="dialog"><button class="dialog-close icon-button" aria-label="关闭发现示例"><i data-lucide="x" aria-hidden="true"></i></button></form><h2 id="consent-title">先看示例里的线索</h2><p>这次只展示 7 条虚构记录中的两条示例发现。你新输入的记录不会被分析。</p><p>不连接 GitHub Copilot，不上传内容，也不消耗模型额度。</p><p class="small">正式接入后，真实分析需要单独确认记录范围和发送授权。</p><div class="actions"><button type="button" class="primary" id="confirm-example">查看示例结果</button><button type="button" id="cancel-example">先不看</button></div></dialog>
   <dialog id="reflection-dialog" aria-labelledby="reflection-title"><form method="dialog"><button class="dialog-close icon-button" aria-label="关闭尝试记录"><i data-lucide="x" aria-hidden="true"></i></button></form><h2 id="reflection-title">尝试之后</h2><p id="reflection-context"></p><form id="reflection-form"><label class="sr-only" for="reflection">尝试后的感受</label><textarea id="reflection" placeholder="做了什么？有没有变化？没有变化也可以写下来。" rows="5"></textarea><p id="reflection-status" role="status"></p><div class="actions"><button type="submit" class="primary" id="save-reflection" disabled>记下感受</button><button type="button" id="cancel-reflection">暂时不写</button></div></form></dialog>
+  <dialog id="import-dialog" aria-labelledby="import-title"><form method="dialog"><button class="dialog-close icon-button" aria-label="关闭导入" id="close-import"><i data-lucide="x" aria-hidden="true"></i></button></form><h2 id="import-title">把 flomo 记录带进来</h2><p class="small">在 flomo「设置 → 账号详情」导出全部记录。如果得到 ZIP，先解压，再选择其中的 HTML 文件。</p><label class="file-label" for="import-file">选择导出的 HTML</label><input type="file" id="import-file" accept=".html,.htm,text/html" multiple><p class="small">只在此浏览器读取，保存在当前体验稿。不上传、不调用 AI；文字、原日期和 #标签会保留，图片和附件暂不导入。</p><div id="import-preview" hidden><p id="import-summary"></p><p class="small" id="import-warning"></p><div id="import-examples" class="import-examples"></div><label id="import-ack-label" class="import-ack" hidden><input type="checkbox" id="import-ack">我已了解未导入项，并会保留 flomo 原导出文件</label></div><p id="import-status" role="status"></p><div class="actions"><button type="button" id="confirm-import" class="primary" disabled><i data-lucide="import" aria-hidden="true"></i>确认导入</button><button type="button" id="cancel-import">取消</button></div></dialog>
 </body>
 </html>

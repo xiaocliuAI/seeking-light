@@ -24,6 +24,20 @@ nav {display:flex;gap:6px;}
 nav button {color:var(--muted);border-radius:0;padding:9px 12px;}
 nav button[aria-current="page"] {color:var(--brand);box-shadow:inset 0 -2px var(--brand);}
 .edition {margin-left:auto;font-size:12px;color:var(--muted);}
+#open-import {color:var(--brand);margin-left:auto;flex:none;}
+.history-pager {display:flex;align-items:center;justify-content:center;gap:16px;margin:20px 0;font-size:12px;color:var(--muted);}
+.file-label {display:block;font-weight:500;margin-bottom:8px;}
+#import-file {display:block;width:100%;min-width:0;margin-bottom:18px;font-size:13px;}
+#import-file::file-selector-button {padding:9px 12px;border:1px solid var(--line);border-radius:4px;background:var(--ground);color:var(--brand);font:inherit;margin-right:10px;cursor:pointer;}
+#import-dialog {max-height:calc(100dvh - 36px);overflow-y:auto;}
+#import-summary {font-weight:500;color:var(--brand);}
+.import-examples {border-top:1px solid var(--line);margin-bottom:18px;}
+.import-examples article {padding:12px 0;border-bottom:1px solid var(--line);}
+.import-examples time {font-size:12px;color:var(--muted);}
+.import-examples p {font:18px/1.8 var(--hand);white-space:pre-wrap;margin:5px 0 0;}
+.import-ack {display:flex;align-items:flex-start;gap:9px;font-size:12px;margin-bottom:16px;}
+.import-ack input {flex:none;margin-top:5px;}
+#import-status {font-size:12px;color:var(--berry);overflow-wrap:anywhere;}
 main {max-width:1080px;margin:0 auto;padding:0 28px 42px;}
 .sample-banner {padding:12px 0 20px;color:var(--muted);font-size:12px;}
 .page-heading {display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin:9px 0 28px;}
@@ -110,4 +124,5 @@ dialog textarea {font-size:20px;margin:18px 0;min-height:160px;}
 @media(max-width:900px) {.finding-layout {grid-template-columns:minmax(0,1fr);gap:14px;}.annotation {margin-left:calc(var(--axis) + var(--gap));}.shell {padding:20px 28px;gap:20px;}.edition {width:100%;margin-left:37px;}.finding-title h3 {font-size:26px;}}
 @media(max-width:600px) {:root {--axis:64px;--gap:14px;}.shell {padding:19px 20px 12px;gap:13px;}.brand h1 {font-size:27px;}nav {width:100%;gap:14px;}nav button {padding:7px 0;min-width:48px;}.edition {display:none;}main {padding:0 20px 30px;}.sample-banner {font-size:11px;padding:12px 0 16px;}.page-heading {margin:10px 0 22px;}.writing-row {display:block;}.date-axis {flex-direction:row;align-items:baseline;gap:13px;margin-bottom:17px;}.date-axis strong {font-size:26px;}textarea {font-size:21px;}.entry p {font-size:20px;}.entry {padding:21px 0;}.composer-footer {gap:8px;}.composer-footer #save-status {width:100%;}.composer-footer .actions {margin-left:auto;}.quiet-entry {display:block;}.quiet-entry .axis-label {display:none;}.footprint-body {margin-left:0;}.heatmap {gap:1px;}.legend span {width:100%;}.finding-switch {margin-left:0;}.finding-title {display:block;}.finding-title .axis-label {display:block;margin-bottom:9px;}.finding-title h3 {font-size:25px;}.annotation {margin:0 0 0 78px;padding-left:14px;}.start-finding {display:block;padding-top:8px;}.start-finding .axis-label {display:block;margin-bottom:15px;}.start-finding p {font-size:23px;}.page-footer {padding:20px;flex-direction:column;gap:5px;}dialog {padding:25px 22px;}dialog textarea {font-size:19px;}}
 @media(pointer:coarse) {button,summary,select {min-height:44px;}.icon-button {min-width:44px;}}
+@media(max-width:600px) {#open-import {order:1;}.shell nav {order:2;}}
 @media(prefers-reduced-motion:reduce) {* {scroll-behavior:auto!important;}}
