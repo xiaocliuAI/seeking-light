@@ -33,6 +33,10 @@
 !/docs/
 /docs/*
 !/docs/development.md
+!/docs/web-test-plan.md
+!/docs/issues/
+/docs/issues/*
+!/docs/issues/*.md
 !/output/
 /output/*
 !/output/seeking-light/

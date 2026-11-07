@@ -31,7 +31,8 @@ npm test
 本目录是共享工作区，Git 只追踪 `.gitignore` 白名单中的寻光日记文件。
 家庭学习文件、临时输出、截图、用户数据、凭证和日志不进入版本库。
 新文件需明确加入白名单；不要为方便使用 `git add -f` 绕过保护。
-当前仅建立本地版本管理，没有上传 GitHub，也没有发布应用。
+当前代码已推送到 GitHub 的 xiaocliuAI/seeking-light；没有发布应用。
+网页验收任务已建成 issues，尚未启动自动执行 Agent。
 
 ## 开发依据
 
@@ -40,3 +41,4 @@ npm test
 - `product-plan.md`：早期功能规划，视觉和输入方式以最新设计约定为准。
 - `COPILOT.md`：本机模型连接与隐私边界。
 - `docs/development.md`：下一阶段任务及 Agent team 协作方式。
+- `docs/web-test-plan.md`：网页测试前置条件、最短验收路径和 Agent 执行门槛。
