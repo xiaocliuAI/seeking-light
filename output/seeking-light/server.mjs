@@ -9,7 +9,7 @@ const files = new Map([
   ['/journal.js', [new URL('./journal.js', import.meta.url), 'text/javascript']],
   ['/assets/lucide.min.js', [new URL('../../assets/lucide.min.js', import.meta.url), 'text/javascript']],
 ]);
-export function createServer() {
+export function createServer({ fontFailure = false } = {}) {
   return http.createServer(async (request, response) => {
     const host = request.headers.host || '';
     if (!/^(127\.0\.0\.1|localhost)(:\d+)?$/.test(host)) {
@@ -26,7 +26,14 @@ export function createServer() {
     }
     try {
       let bytes = await fs.readFile(fileURLToPath(resource[0]));
-      if (resource[1] === 'text/html') bytes = Buffer.from(bytes.toString().replace('../../assets/lucide.min.js', '/assets/lucide.min.js'));
+      if (resource[1] === 'text/html') {
+        let html = bytes.toString().replace('../../assets/lucide.min.js', '/assets/lucide.min.js');
+        if (fontFailure) html = html.replace(
+          'href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-regular.css"',
+          'href="/test-font-unavailable.css"',
+        );
+        bytes = Buffer.from(html);
+      }
       response.writeHead(200, {
         'Content-Type': `${resource[1]}; charset=utf-8`,
         'X-Content-Type-Options': 'nosniff',

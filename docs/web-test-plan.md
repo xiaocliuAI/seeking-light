@@ -36,6 +36,8 @@
 第一轮只执行 #1，再在前置通过后验收 #2 和 #3。
 #1 已通过 PR #9 合并并关闭；#3 的实际浏览器结果见 docs/recording-regression-report.md。
 自动检查新增的 prototype regression 使用 DOM 替身，不能取代该浏览器报告。
+#3 已通过 PR #10 合并并关闭。#2 的部分结果见 docs/visual-accessibility-report.md，
+缩放、真实手机和用户评价未完成前仍保持开放；不因此跳过 #4 前置。
 
 ## 测试开始前的准备
 
