@@ -34,6 +34,8 @@
 
 任务正文的版本化副本在 docs/issues/；文件编号是文档顺序，不是 GitHub issue 编号。
 第一轮只执行 #1，再在前置通过后验收 #2 和 #3。
+#1 已通过 PR #9 合并并关闭；#3 的实际浏览器结果见 docs/recording-regression-report.md。
+自动检查新增的 prototype regression 使用 DOM 替身，不能取代该浏览器报告。
 
 ## 测试开始前的准备
 
