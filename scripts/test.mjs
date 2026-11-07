@@ -9,6 +9,7 @@ const audits = [
   'tests/copilot-audit.mjs',
   'output/seeking-light/source-audit.mjs',
   'tests/test-readiness-audit.mjs',
+  'tests/prototype-regression.mjs',
 ];
 const root = new URL('../', import.meta.url);
 let failed = false;
