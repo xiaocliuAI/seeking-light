@@ -22,19 +22,18 @@
       <button type="button" id="open-import" class="icon-button" aria-label="从 flomo 导入" title="从 flomo 导入"><i data-lucide="import" aria-hidden="true"></i></button>
     </header>
     <main>
-      <details class="sample-banner"><summary>体验稿 · 仅本机保存 · 发现为示例</summary><p>含虚构记录，发现不调用 Copilot，也不分析新输入。记录只保存在当前浏览器，不会跨设备同步。</p></details>
+      <details class="sample-banner"><summary>仅本机 · 示例发现</summary><p>这是体验稿，含虚构记录。发现不调用 Copilot，也不分析新输入。记录只保存在当前浏览器，不会跨设备同步。</p></details>
       <section data-panel="notes" aria-label="随手记">
-        <div class="page-heading"><h2>随手记</h2><span data-today-count>今天 0 条</span></div>
+        <div class="sr-only"><h2>随手记</h2><span data-today-count>今天 0 条</span></div>
         <div class="writing-row">
-          <aside class="date-axis"><strong data-date-number></strong><span data-date-caption></span></aside>
+          <aside class="date-axis"><strong data-date-number></strong><span class="sr-only" data-date-caption></span></aside>
           <form id="capture-form" class="composer">
             <label class="sr-only" for="capture">记录此刻</label>
             <textarea id="capture" placeholder="今天，想留下什么？" rows="3"></textarea>
-            <div class="composer-footer"><span id="save-status" role="status">仅保存在本机</span><div class="actions"><button type="button" id="focus" class="icon-button" aria-label="专注书写" aria-pressed="false" title="专注书写"><i data-lucide="expand" aria-hidden="true"></i></button><button type="submit" class="primary" id="save" disabled><i data-lucide="arrow-up" aria-hidden="true"></i>记下</button></div></div>
+            <div class="composer-footer"><span id="save-status" role="status"></span><div class="actions"><button type="button" id="focus" class="icon-button" aria-label="专注书写" aria-pressed="false" title="专注书写"><i data-lucide="expand" aria-hidden="true"></i></button><button type="submit" class="primary" id="save" disabled><i data-lucide="arrow-up" aria-hidden="true"></i>记下</button></div></div>
           </form>
         </div>
         <div class="stream" id="recent-stream" aria-label="最近的原文"></div>
-        <div class="margin-row quiet-entry"><button type="button" data-view="findings">看看发现示例<i data-lucide="arrow-up-right" aria-hidden="true"></i></button></div>
       </section>
       <section data-panel="history" aria-label="回看" hidden>
         <div class="page-heading"><h2>留在这里的生活</h2><label class="date-filter">日期<select id="history-date" aria-label="回看日期"><option value="all">全部日期</option></select></label></div>
@@ -48,12 +47,12 @@
         <button type="button" id="back-to-finding" class="text-button" hidden><i data-lucide="arrow-left" aria-hidden="true"></i>回到刚才的发现</button>
       </section>
       <section data-panel="findings" aria-label="发现" hidden>
-        <div class="page-heading"><h2>原文里的光</h2><span>示例发现</span></div>
-        <div id="finding-start" class="margin-row start-finding"><span class="axis-label">7 条示例</span><div><p>有些让你恢复、让你起劲的时刻，<br>可能已经留在这些记录里。</p><button type="button" class="primary" id="show-consent"><i data-lucide="scan-text" aria-hidden="true"></i>查看发现示例</button></div></div>
+        <div class="page-heading"><h2>发现示例</h2></div>
+        <div id="finding-start" class="start-finding"><p>看看原文里，<br>有哪些值得留意的时刻。</p><button type="button" class="primary" id="show-consent"><i data-lucide="scan-text" aria-hidden="true"></i>查看示例</button></div>
         <div id="finding-result" hidden>
           <div class="finding-switch" role="group" aria-label="示例线索"><button type="button" data-finding="restore" aria-pressed="true">恢复的线索</button><button type="button" data-finding="interest" aria-pressed="false">兴趣的线索</button></div>
-          <header class="margin-row finding-title"><span class="axis-label" id="finding-label"></span><div><h3 id="finding-title"></h3><p id="finding-subtitle"></p></div></header>
-          <div class="finding-layout"><div id="evidence-stream"></div><aside class="annotation" aria-label="发现旁注"><span class="annotation-label">旁注 / 示例</span><h4>值得留意的共同点</h4><p id="finding-observation"></p><details><summary>也有不确定的地方</summary><p id="finding-uncertainty"></p></details><div class="feedback"><span>这条线索贴近你吗？</span><div class="actions"><button type="button" data-feedback="yes" aria-pressed="false">有点像</button><button type="button" data-feedback="no" aria-pressed="false">不太对</button></div><p id="feedback-status" role="status"></p></div><section class="experiment"><span class="annotation-label">一个可选的小尝试</span><h4 id="experiment-title"></h4><p id="experiment-body"></p><div class="actions"><button type="button" id="keep-attempt"><i data-lucide="bookmark" aria-hidden="true"></i>留作小尝试</button><button type="button" id="defer-attempt">先放一放</button></div><p id="attempt-status" role="status"></p><button type="button" id="reflect-attempt" class="text-button" hidden><i data-lucide="pencil" aria-hidden="true"></i>记下尝试后的感受</button><p id="attempt-result" hidden></p></section></aside></div>
+          <header class="finding-title"><span class="sr-only" id="finding-label"></span><h3 id="finding-title"></h3><p class="sr-only" id="finding-subtitle"></p></header>
+          <div class="finding-layout"><div id="evidence-stream"></div><aside class="annotation" aria-label="发现旁注"><p id="finding-observation"></p><details><summary>其他可能</summary><p id="finding-uncertainty"></p></details><div class="feedback" role="group" aria-label="这条线索贴近你吗？"><div class="actions"><button type="button" data-feedback="yes" aria-pressed="false">有点像</button><button type="button" data-feedback="no" aria-pressed="false">不太对</button></div><p id="feedback-status" role="status"></p></div><details class="experiment"><summary>一个小尝试</summary><h4 id="experiment-title"></h4><p id="experiment-body"></p><div class="actions"><button type="button" id="keep-attempt"><i data-lucide="bookmark" aria-hidden="true"></i>留作小尝试</button><button type="button" id="defer-attempt">先放一放</button></div><p id="attempt-status" role="status"></p><button type="button" id="reflect-attempt" class="text-button" hidden><i data-lucide="pencil" aria-hidden="true"></i>记下尝试后的感受</button><p id="attempt-result" hidden></p></details></aside></div>
         </div>
       </section>
     </main>

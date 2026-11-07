@@ -42,21 +42,23 @@
   function el(tag,className,text) {const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
   function icons(){if(window.lucide)window.lucide.createIcons({attrs:{width:18,height:18}});}
   function formatDate(key){const [y,m,d]=key.split('-');return `${Number(y)!==today.getFullYear()?`${y} 年 `:''}${Number(m)} 月 ${Number(d)} 日`;}
-  function entry(note,quote='',link=false) {
+  function entry(note,quote='',link=false,showDate=true) {
     const article=el('article',`entry${note.id===sourceId?' is-source':''}`);article.dataset.noteId=note.id;
-    const meta=el('div','entry-meta');meta.append(el('time','',formatDate(note.date)),el('span','',note.time||''));if(note.sample)meta.append(el('span','','示例'));
+    const meta=el('details','entry-meta');
+    const stamp=el('summary','',`${showDate?`${formatDate(note.date)} `:''}${note.time||'记录'}${note.sample?' · 示例':''}`);
+    stamp.title='查看记录详情';meta.append(stamp,el('p','',`${note.date} ${note.time||''}`));
+    if(note.source==='flomo')meta.append(el('p','','来自 flomo'));
+    if(note.attempt)meta.append(el('p','',`小尝试的回看 / ${findings[note.attempt]?.label||'自己的尝试'}`));
     const content=el('div','entry-text'),text=el('p');
     const at=quote?note.text.indexOf(quote):-1;
     if(at>=0){text.append(document.createTextNode(note.text.slice(0,at)),el('mark','',quote),document.createTextNode(note.text.slice(at+quote.length)));}else text.textContent=note.text;
     content.append(text);
-    if(note.attempt)content.append(el('p','entry-extra',`小尝试的回看 / ${findings[note.attempt]?.label||'自己的尝试'}`));
-    if(note.source==='flomo')content.append(el('p','entry-extra','来自 flomo'));
-    if(link){const button=el('button','source-link','查看完整原文');button.type='button';button.addEventListener('click',()=>{sourceId=note.id;filter=note.date;view='history';focus=false;const at=allNotes().filter(n=>n.date===filter).findIndex(n=>n.id===note.id);historyPage=Math.floor(Math.max(0,at)/pageSize);render();$('#history-stream').querySelector(`[data-note-id="${note.id}"]`)?.scrollIntoView({block:'center',behavior:'instant'});});content.append(button);}
+    if(link){const button=el('button','source-link icon-button');button.type='button';button.setAttribute('aria-label','查看完整原文');button.title='查看完整原文';const icon=el('i');icon.setAttribute('data-lucide','arrow-up-right');icon.setAttribute('aria-hidden','true');button.append(icon);button.addEventListener('click',()=>{sourceId=note.id;filter=note.date;view='history';focus=false;const at=allNotes().filter(n=>n.date===filter).findIndex(n=>n.id===note.id);historyPage=Math.floor(Math.max(0,at)/pageSize);render();$('#history-stream').querySelector(`[data-note-id="${note.id}"]`)?.scrollIntoView({block:'center',behavior:'instant'});});content.append(button);}
     article.append(meta,content);return article;
   }
   function renderStream(target,notes) {
     target.replaceChildren();let previous='';
-    for(const note of notes){if(note.date!==previous){if(previous)target.append(el('div','day-divider',formatDate(note.date)));previous=note.date;}target.append(entry(note));}
+    for(const note of notes){if(note.date!==previous){target.append(el('h3','day-divider',formatDate(note.date)));previous=note.date;}target.append(entry(note,'',false,false));}
     if(!notes.length)target.append(el('p','empty','这一天还没有留下记录。'));
   }
   function renderCounts() {
