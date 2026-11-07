@@ -6,11 +6,14 @@ const html = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
 const js = fs.readFileSync(new URL('./journal.js', import.meta.url), 'utf8');
 const css = fs.readFileSync(new URL('./journal.css', import.meta.url), 'utf8');
 for (const match of css.matchAll(/font-size:\s*(\d+(?:\.\d+)?)px/g)) {
-  assert(Number(match[1]) >= 14, 'Explicit text sizes must be at least 14px, including mobile');
+  assert(Number(match[1]) >= 16, 'Explicit text sizes must be at least 16px, including mobile');
 }
 assert.match(css, /body \{[^}]*font:16px/);
-assert.match(css, /\.annotation \{[^}]*font-size:16px/);
-assert.match(html, /<details class="sample-banner"><summary>体验稿 · 仅本机保存 · 发现为示例<\/summary>/);
+assert.match(css, /\.annotation \{[^}]*font-size:18px/);
+assert.match(html, /<details class="sample-banner"><summary>仅本机 · 示例发现<\/summary>/);
+assert.match(html, /<details class="experiment"><summary>一个小尝试<\/summary>/);
+assert(!html.includes('class="quiet-entry"'));
+assert(!html.includes('class="annotation-label"'));
 assert.match(html, /不分析新输入/);
 assert.match(html, /不会跨设备同步/);
 assert(!html.includes('class="edition"'), 'No redundant design label in the header');

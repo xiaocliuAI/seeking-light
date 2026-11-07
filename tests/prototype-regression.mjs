@@ -153,6 +153,12 @@ const storage = makeStorage();
 let app = boot(storage);
 assert.equal(app.node('#save').disabled, true);
 assert.equal(app.node('[data-count="today"]').textContent, '3', 'Initial count includes three marked examples');
+const dayHeadings = app.node('#history-stream').querySelectorAll('.day-divider');
+assert.equal(dayHeadings.length, 5, 'One date heading per day, including the first day');
+assert.equal(new Set(dayHeadings.map(node => node.textContent)).size, 5);
+const sampleMeta = noteArticle(app, 'walk').querySelector('.entry-meta');
+assert.equal(sampleMeta.tagName, 'details', 'Record details are progressively disclosed');
+assert.equal(sampleMeta.querySelector('summary').textContent, '19:20 · 示例', 'No repeated date under the day heading; sample stays labelled');
 for (const input of inputCases.filter(input => !input.shouldSave)) {
   app.input('#capture', input.text);
   assert.equal(app.node('#save').disabled, true);
@@ -219,6 +225,7 @@ for (const finding of ['restore', 'interest']) {
     assert.ok(marks[0].textContent.length > 0);
     const original = prose(article);
     assert.ok(original.includes(marks[0].textContent));
+    assert.equal(article.querySelector('.source-link').attributes['aria-label'], '查看完整原文', 'Icon-only source action retains an accessible name');
     article.querySelector('.source-link').fire('click');
     const full = noteArticle(app, article.dataset.noteId);
     assert.ok(full.scrolled);
