@@ -7,6 +7,7 @@ const files = new Map([
   ['/', [new URL('./index.html', import.meta.url), 'text/html']],
   ['/journal.css', [new URL('./journal.css', import.meta.url), 'text/css']],
   ['/journal.js', [new URL('./journal.js', import.meta.url), 'text/javascript']],
+  ['/flomo-import.js', [new URL('./flomo-import.js', import.meta.url), 'text/javascript']],
   ['/assets/lucide.min.js', [new URL('../../assets/lucide.min.js', import.meta.url), 'text/javascript']],
 ]);
 export function createServer({ fontFailure = false } = {}) {

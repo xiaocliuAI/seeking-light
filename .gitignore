@@ -43,6 +43,7 @@
 !/docs/test-readiness-report.md
 !/docs/recording-regression-report.md
 !/docs/visual-accessibility-report.md
+!/docs/flomo-import.md
 !/docs/issues/
 /docs/issues/*
 !/docs/issues/*.md
@@ -53,6 +54,7 @@
 !/output/seeking-light/index.html
 !/output/seeking-light/journal.css
 !/output/seeking-light/journal.js
+!/output/seeking-light/flomo-import.js
 !/output/seeking-light/server.mjs
 !/output/seeking-light/source-audit.mjs
 !/output/seeking-light/design-contract.md

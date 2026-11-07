@@ -10,6 +10,7 @@ const audits = [
   'output/seeking-light/source-audit.mjs',
   'tests/test-readiness-audit.mjs',
   'tests/prototype-regression.mjs',
+  'tests/flomo-import-audit.mjs',
 ];
 const root = new URL('../', import.meta.url);
 let failed = false;

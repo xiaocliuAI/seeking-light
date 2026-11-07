@@ -67,7 +67,7 @@ for (const fontFailure of [false, true]) {
     server.listen(0, '127.0.0.1');
     await once(server, 'listening');
     assert.equal(server.address().address, '127.0.0.1');
-    for (const [path, type] of [['/', 'text/html'], ['/journal.css', 'text/css'], ['/journal.js', 'text/javascript'], ['/assets/lucide.min.js', 'text/javascript']]) {
+    for (const [path, type] of [['/', 'text/html'], ['/journal.css', 'text/css'], ['/journal.js', 'text/javascript'], ['/flomo-import.js', 'text/javascript'], ['/assets/lucide.min.js', 'text/javascript']]) {
       const result = await request(path);
       assert.equal(result.status, 200, path);
       assert.equal(result.headers['content-type'], `${type}; charset=utf-8`);

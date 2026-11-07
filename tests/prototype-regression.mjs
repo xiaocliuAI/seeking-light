@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import { webcrypto } from 'node:crypto';
 import { records, inputCases } from './web-fixtures.mjs';
 
 const html = fs.readFileSync(new URL('../output/seeking-light/index.html', import.meta.url), 'utf8');
@@ -48,7 +49,7 @@ class Element {
   fire(name) {
     assert.ok(this.listeners[name]?.length, `No ${name} handler on ${this.id || this.tagName}`);
     const event = { target: this, defaultPrevented: false, preventDefault() { this.defaultPrevented = true; } };
-    for (const listener of this.listeners[name]) listener(event);
+    event.pending = Promise.all(this.listeners[name].map(listener => listener(event)));
     return event;
   }
   querySelectorAll(selector) {
@@ -93,7 +94,7 @@ function makeStorage() {
   };
 }
 
-function boot(storage = makeStorage()) {
+function boot(storage = makeStorage(), importResult = null) {
   const effects = [];
   const windowListeners = new Map();
   const navStart = html.indexOf('<nav '), navEnd = html.indexOf('</nav>');
@@ -118,8 +119,14 @@ function boot(storage = makeStorage()) {
   }
   const math = Object.create(Math);
   math.random = () => ++idSequence / 10000;
-  const context = vm.createContext({ document, localStorage: storage, Date: TestDate, Math: math,
+  const importWindow = { crypto: webcrypto };
+  if (importResult) {
+    vm.runInNewContext(fs.readFileSync(new URL('../output/seeking-light/flomo-import.js', import.meta.url), 'utf8'), { window: importWindow, TextEncoder, Date, Uint8Array });
+    importWindow.SeekingLightImport.parseHTML = () => importResult;
+  }
+  const context = vm.createContext({ document, localStorage: storage, Date: TestDate, Math: math, TextDecoder,
     window: {
+      ...importWindow,
       addEventListener(type, listener) { const callbacks = windowListeners.get(type) || []; callbacks.push(listener); windowListeners.set(type, callbacks); },
       scrollTo() {},
     },
@@ -437,3 +444,89 @@ assert.equal(draftApp.node('#reflection').value, '');
 assert.equal(draftApp.node('#save-reflection').disabled, true);
 
 console.log('Prototype regression passed: capture/storage/evidence/feedback/reflection, isolated per-finding reflection drafts, cancel/reopen/failure/success cleanup and explicit focus/modal callbacks. DOM double only: no native keyboard activation, Tab/Esc, focus trapping/restoration or browser layout tested; no real storage, network or model accessed.');
+
+// Import workflow tests inject parsed fixtures; HTML is parsed separately in a real browser.
+const imports = { total: 3, invalid: 0, empty: 0, media: 0, records: [
+  { date: '2025-06-01', time: '10:20:30', text: 'TEST_ONLY_FICTION\n#life import', tags: ['life'], source: 'flomo' },
+  { date: '2025-06-01', time: '10:20:30', text: 'TEST_ONLY_FICTION\n#life import', tags: ['life'], source: 'flomo' },
+  { date: '2026-11-01', time: '01:02:03', text: 'TEST_ONLY_FICTION second', tags: [], source: 'flomo' },
+] };
+const importStorage = makeStorage(), importer = boot(importStorage, imports);
+importer.save('TEST_ONLY_FICTION existing');
+importer.input('#capture', 'TEST_ONLY_FICTION unsent draft');
+const beforeImport = importStorage.serialized();
+async function selectImport(app) {
+  app.click('#open-import');
+  app.node('#import-file').files = [{ name: 'fiction.html', size: 10, arrayBuffer: async () => new TextEncoder().encode('fixture').buffer }];
+  await app.node('#import-file').fire('change').pending;
+}
+await selectImport(importer);
+assert.equal(importStorage.serialized(), beforeImport, 'Preview never writes');
+assert.match(importer.node('#import-summary').textContent, /新增 2 条 · 重复 1 条/);
+assert.equal(importer.node('#confirm-import').disabled, false);
+importer.click('#cancel-import');
+assert.equal(importStorage.serialized(), beforeImport, 'Cancel never writes');
+await selectImport(importer);
+importStorage.failWrite = true;
+importer.click('#confirm-import');
+assert.equal(importStorage.serialized(), beforeImport, 'Quota error is all-or-nothing');
+assert.equal(importer.node('#import-dialog').open, true);
+assert.match(importer.node('#import-status').textContent, /整批未导入/);
+importStorage.failWrite = false;
+importer.click('#confirm-import');
+assert.equal(importStorage.snapshot().notes.length, 3);
+assert.equal(importStorage.snapshot().draft, 'TEST_ONLY_FICTION unsent draft');
+assert.equal(importer.node('#capture').value, 'TEST_ONLY_FICTION unsent draft');
+assert.equal(importStorage.snapshot().notes[0].time, '10:20:30');
+assert.deepEqual(importStorage.snapshot().notes[0].tags, ['life']);
+assert.equal(boot(importStorage).node('#history-date').children.some(node => node.value === '2025-06-01'), true);
+await selectImport(importer);
+assert.equal(importer.node('#confirm-import').disabled, true, 'Reimport adds nothing');
+const another = boot(importStorage, imports);
+await selectImport(another);
+// Make another-origin tab change the same local store between preview and commit.
+const changed = { ...importStorage.snapshot(), notes: [{ id: 'test-other-tab', date: '2026-11-07', time: '12:00', text: 'TEST_ONLY_FICTION another tab' }] };
+importStorage.setItem(storageKey, JSON.stringify(changed));
+// This parsed batch contains new records relative to that instance's state.
+const raceApp = boot(importStorage, imports);
+await selectImport(raceApp);
+const newer = JSON.stringify({ ...changed, draft: 'TEST_ONLY_FICTION newer draft' });
+importStorage.setItem(storageKey, newer);
+raceApp.click('#confirm-import');
+assert.equal(importStorage.serialized(), newer);
+assert.match(raceApp.node('#import-status').textContent, /发生变化/);
+const mediaApp = boot(makeStorage(), { ...imports, media: 1 });
+await selectImport(mediaApp);
+assert.equal(mediaApp.node('#confirm-import').disabled, true);
+mediaApp.node('#import-ack').checked = true;
+mediaApp.node('#import-ack').fire('change');
+assert.equal(mediaApp.node('#confirm-import').disabled, false);
+for (const file of [
+  { name: 'fiction.zip', size: 10, arrayBuffer: async () => new ArrayBuffer(0) },
+  { name: 'fiction.html', size: 20 * 1024 * 1024 + 1, arrayBuffer: async () => new ArrayBuffer(0) },
+  { name: 'fiction.html', size: 1, arrayBuffer: async () => new Uint8Array([255]).buffer },
+]) {
+  const invalidApp = boot(makeStorage(), imports);
+  invalidApp.click('#open-import');
+  invalidApp.node('#import-file').files = [file];
+  await invalidApp.node('#import-file').fire('change').pending;
+  assert.equal(invalidApp.node('#confirm-import').disabled, true);
+  assert.match(invalidApp.node('#import-status').textContent, /ZIP|20 MB|编码/);
+  assert.equal(invalidApp.storage.snapshot().notes.length, 0);
+}
+const pageStorage = makeStorage();
+pageStorage.setItem(storageKey, JSON.stringify({ notes: Array.from({ length: 51 }, (_, i) => ({ id: `test-page-${i}`, date: '2026-11-06', time: '13:00', text: `TEST_ONLY_FICTION page ${i}` })), draft: '', feedback: {}, attempts: {} }));
+const pageApp = boot(pageStorage);
+pageApp.click('[data-view="history"]');
+assert.equal(pageApp.node('#history-stream').querySelectorAll('article').length, 50);
+assert.equal(pageApp.node('#history-next').disabled, false);
+pageApp.click('#history-next');
+assert.equal(pageApp.node('#history-prev').disabled, false);
+assert.ok(pageApp.node('#history-stream').querySelectorAll('article').length < 50);
+pageApp.click('[data-view="findings"]');
+pageApp.click('#show-consent');
+pageApp.click('#confirm-example');
+pageApp.node('#evidence-stream').querySelectorAll('button')[1].fire('click');
+assert.ok(noteArticle(pageApp, 'lunch'), 'Evidence source opens the page containing its original, not just page one');
+assert.equal(pageApp.node('#history-prev').disabled, false);
+console.log('Import workflow double passed: preview/cancel, dedupe, atomic quota failure/retry, draft/date/tag preservation, reload, stale-tab refusal and media acknowledgement. No HTML engine or real user files.');
